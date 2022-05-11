@@ -49,7 +49,7 @@ class GavinDestroyer(BotAI):
         #supply management
         if self.structures(UnitTypeId.BARRACKS).ready:
             if self.supply_cap < 200:
-                if self.supply_left < self.townhalls.amount * 3 and self.already_pending(UnitTypeId.SUPPLYDEPOT) < self.townhalls.amount:
+                if self.supply_left < self.townhalls.amount * 3 and self.already_pending(UnitTypeId.SUPPLYDEPOT) < self.townhalls.ready.amount:
                     if self.can_afford(UnitTypeId.SUPPLYDEPOT):
                         await self.build(UnitTypeId.SUPPLYDEPOT, near=CC.position.towards(self.game_info.map_center, 5))
         else:
@@ -82,7 +82,7 @@ class GavinDestroyer(BotAI):
             for port in self.structures(UnitTypeId.STARPORT).ready.idle:
                 if self.structures(UnitTypeId.STARPORTREACTOR).amount < 1:
                     port.build(UnitTypeId.STARPORTREACTOR)
-                if self.structures(UnitTypeId.STARPORTREACTOR).ready:
+                if self.structures(UnitTypeId.STARPORTREACTOR).ready.idle and self.can_afford(UnitTypeId.MEDIVAC) * 2:
                     port.train(UnitTypeId.MEDIVAC)
                     port.train(UnitTypeId.MEDIVAC)
         if self.structures(UnitTypeId.FACTORY).ready and self.can_afford(UnitTypeId.ARMORY) and self.structures(UnitTypeId.ARMORY).amount < 1:
@@ -91,7 +91,7 @@ class GavinDestroyer(BotAI):
 
         #upgrades
         if self.townhalls.amount >= 2 and self.structures(UnitTypeId.FACTORY):
-            if self.can_afford(UnitTypeId.ENGINEERINGBAY) and self.already_pending(UnitTypeId.ENGINEERINGBAY) + self.structures(UnitTypeId.ENGINEERINGBAY).amount < 2:
+            if self.can_afford(UnitTypeId.ENGINEERINGBAY) and self.structures(UnitTypeId.ENGINEERINGBAY).amount < 2:
                 await self.build(UnitTypeId.ENGINEERINGBAY, near = self.start_location.towards(self.game_info.map_center, 10))
             if self.structures(UnitTypeId.ENGINEERINGBAY).ready.amount == 2:
                 for ebay in self.structures(UnitTypeId.ENGINEERINGBAY).idle:
@@ -101,6 +101,8 @@ class GavinDestroyer(BotAI):
                     if self.structures(UnitTypeId.ARMORY).ready:
                         ebay.research(UpgradeId.TERRANINFANTRYWEAPONSLEVEL2)
                         ebay.research(UpgradeId.TERRANINFANTRYARMORSLEVEL2)
+                        ebay.research(UpgradeId.TERRANINFANTRYWEAPONSLEVEL3)
+                        ebay.research(UpgradeId.TERRANINFANTRYARMORSLEVEL3)
 
                 if self.already_pending_upgrade(UpgradeId.TERRANINFANTRYARMORSLEVEL1):
                     for racklab in self.structures(UnitTypeId.BARRACKSTECHLAB).idle:
@@ -139,7 +141,7 @@ class GavinDestroyer(BotAI):
 run_game(
     maps.get("ProximaStationLE"),
     [Bot(Race.Terran, GavinDestroyer()),
-    Computer(Race.Zerg, Difficulty.VeryHard)],
+    Computer(Race.Terran, Difficulty.VeryHard)],
      realtime=False,
 )
 # Computer(Race.Protoss, Difficulty.VeryHard)
